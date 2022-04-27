@@ -16,45 +16,45 @@ spec:
         app: minecraft-server
     spec:
       volumes:
-      - name: minecraft-data
-        persistentVolumeClaim:
-          claimName: minecraft-data-pvc
+        - name: minecraft-data
+          persistentVolumeClaim:
+            claimName: minecraft-data-pvc
       containers:
-      - name: minecraft-server
-        image: itzg/minecraft-server:latest
-        resources:
-          limits:
-            memory: {{ .Values.resources.limits.memory }}
-          requests:
-            memory: {{ .Values.resources.requests.memory }}
-        env:
-          - name:  EULA
-            value: 'TRUE'
-          - name: MODE
-            value: {{ .Values.minecraft.gamemode }}
-          - name: MOTD
-            value: {{ .Values.minecraft.motd }}
-          - name: ALLOW_FLIGHT
-            value: 'TRUE'
-        ports:
-        - containerPort: {{ .Values.minecraft.port }}
-          name: minecraft
-        volumeMounts:
-          - name: minecraft-data
-            mountPath:  /data
-        readinessProbe:
-          exec:
-            command:
-            - mcstatus
-            - 127.0.0.1
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 30
-        livenessProbe:
-          exec:
-            command:
-            - mcstatus
-            - 127.0.0.1
-            - ping
-          initialDelaySeconds: 30
-          periodSeconds: 30
+        - name: minecraft-server
+          image: itzg/minecraft-server:latest
+          resources:
+            limits:
+              memory: { { .Values.resources.limits.memory } }
+            requests:
+              memory: { { .Values.resources.requests.memory } }
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: MODE
+              value: { { .Values.minecraft.gamemode } }
+            - name: MOTD
+              value: { { .Values.minecraft.motd } }
+            - name: ALLOW_FLIGHT
+              value: "TRUE"
+          ports:
+            - containerPort: { { .Values.minecraft.port } }
+              name: minecraft
+          volumeMounts:
+            - name: minecraft-data
+              mountPath: /data
+          readinessProbe:
+            tcpSocket:
+              port: 25565
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          livenessProbe:
+            tcpSocket:
+              port: 25565
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 10
+            successThreshold: 1
+            timeoutSeconds: 1
